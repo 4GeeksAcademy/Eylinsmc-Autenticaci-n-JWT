@@ -15,7 +15,7 @@ export const Navbar = () => {
     <nav className="navbar">
       <div className="navbar__left">
         <Link to="/" className="navbar__brand">
-          Mi Panel Seguro
+          Mis Notas
         </Link>
       </div>
 
@@ -34,7 +34,7 @@ export const Navbar = () => {
         {token && (
           <>
             <Link to="/private" className="nav-link">
-              Zona privada
+              Notas
             </Link>
             <button
               className="btn btn-small btn-ghost"

@@ -1,13 +1,14 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 const API_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3001/";
 
 export function Login() {
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: "", password: "" });
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [Loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setForm((prev) => ({
@@ -36,7 +37,7 @@ export function Login() {
       } else {
         const text = await resp.text();
         console.error("Respuesta no JSON /api/login:", text);
-        throw new Error("Error de servidor: respuesta no JSON (revisa la URL).");
+        throw new Error("Error de servidor. Revisa la URL del backend.");
       }
 
       if (!resp.ok) {
@@ -44,9 +45,7 @@ export function Login() {
       }
 
       const token = data.token;
-      if (!token) {
-        throw new Error("El servidor no devolvió un token");
-      }
+      if (!token) throw new Error("El servidor no devolvió un token.");
 
       sessionStorage.setItem("token", token);
       sessionStorage.setItem("userEmail", form.email);
@@ -79,20 +78,37 @@ export function Login() {
 
         <label>
           Contraseña
-          {/* si quieres VER la contraseña mientras debuggeas, cambia a type="text" */}
-          <input
-            type="password"
-            name="password"
-            value={form.password}
-            onChange={handleChange}
-            required
-          />
+          <div className="password-field">
+            <input
+              type={showPassword ? "text" : "password"}
+              name="password"
+              value={form.password}
+              onChange={handleChange}
+              required
+            />
+            <button
+              type="button"
+              className="password-toggle"
+              onClick={() => setShowPassword((v) => !v)}
+            >
+              {showPassword ? (
+                <i className="fa-regular fa-eye-slash"></i>
+              ) : (
+                <i className="fa-regular fa-eye"></i>
+              )}
+            </button>
+
+          </div>
         </label>
+
+        <div className="auth-links">
+          <Link to="/reset-password">¿Olvidaste tu contraseña?</Link>
+        </div>
 
         {error && <p className="error-msg">{error}</p>}
 
-        <button type="submit" className="btn" disabled={loading}>
-          {loading ? "Entrando..." : "Entrar"}
+        <button type="submit" className="btn" disabled={Loading}>
+          {Loading ? "Entrando..." : "Entrar"}
         </button>
       </form>
     </section>

@@ -3,10 +3,11 @@ import { useNavigate } from "react-router-dom";
 
 const API_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3001/";
 
-export function Signup() {
+export function ResetPassword() {
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
+  const [message, setMessage] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -20,10 +21,11 @@ export function Signup() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
+    setMessage(null);
     setLoading(true);
 
     try {
-      const resp = await fetch(`${API_URL}api/signup`, {
+      const resp = await fetch(`${API_URL}api/reset-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -36,15 +38,19 @@ export function Signup() {
         data = await resp.json();
       } else {
         const text = await resp.text();
-        console.error("Respuesta no JSON /api/signup:", text);
+        console.error("Respuesta no JSON /api/reset-password:", text);
         throw new Error("Error de servidor. Revisa la URL del backend.");
       }
 
       if (!resp.ok) {
-        throw new Error(data?.message || data?.msg || "No se pudo crear la cuenta");
+        throw new Error(data?.message || "No se pudo actualizar la contraseña");
       }
 
-      navigate("/login");
+      setMessage(
+        "La contraseña se actualizó correctamente. Ahora puedes iniciar sesión."
+      );
+
+      setTimeout(() => navigate("/login"), 2000);
     } catch (err) {
       console.error(err);
       setError(err.message);
@@ -55,8 +61,8 @@ export function Signup() {
 
   return (
     <section className="auth-page">
-      <h2>Crear cuenta</h2>
-      <p>Usa un correo y una contraseña segura para acceder a tu zona privada.</p>
+      <h2>Restablecer contraseña</h2>
+      <p>Ingresa tu correo y una nueva contraseña.</p>
 
       <form className="auth-form" onSubmit={handleSubmit}>
         <label>
@@ -71,7 +77,7 @@ export function Signup() {
         </label>
 
         <label>
-          Contraseña
+          Nueva contraseña
           <div className="password-field">
             <input
               type={showPassword ? "text" : "password"}
@@ -91,18 +97,19 @@ export function Signup() {
                 <i className="fa-regular fa-eye"></i>
               )}
             </button>
+
           </div>
         </label>
 
+        {message && <p className="success-msg">{message}</p>}
         {error && <p className="error-msg">{error}</p>}
 
         <button type="submit" className="btn" disabled={loading}>
-          {loading ? "Creando..." : "Registrarme"}
+          {loading ? "Actualizando..." : "Actualizar contraseña"}
         </button>
       </form>
     </section>
   );
 }
 
-export default Signup;
-
+export default ResetPassword;

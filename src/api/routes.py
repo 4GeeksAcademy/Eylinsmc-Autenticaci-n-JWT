@@ -88,6 +88,36 @@ def login():
     return jsonify({"token": token}), 200
 
 
+# RESET PASSWORD 
+@api.route("/reset-password", methods=["POST"])
+def reset_password():
+    body = request.get_json()
+
+    if body is None:
+        return jsonify({"message": "Missing JSON"}), 400
+
+    email = (body.get("email") or "").strip()
+    new_password = (body.get("password") or "").strip()
+
+    if not email or not new_password:
+        return jsonify({"message": "Email and new password are required"}), 400
+
+    user = User.query.filter_by(email=email).one_or_none()
+
+    if user is None:
+        return jsonify({"message": "If the email exists, the password was updated"}), 200
+
+    user.password = generate_password_hash(new_password)
+
+    try:
+        db.session.commit()
+        return jsonify({"message": "Password updated successfully"}), 200
+    except Exception as error:
+        db.session.rollback()
+        print("Error updating password:", error)
+        return jsonify({"message": "Error updating password"}), 500
+
+
 # RUTA PRIVADA
 @api.route("/private", methods=["GET"])
 @jwt_required()
