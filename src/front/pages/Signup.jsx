@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 const API_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3001/";
 
-export function Login() {
+export function Signup() {
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState(null);
@@ -22,7 +22,7 @@ export function Login() {
     setLoading(true);
 
     try {
-      const resp = await fetch(`${API_URL}api/login`, {
+      const resp = await fetch(`${API_URL}api/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -35,23 +35,15 @@ export function Login() {
         data = await resp.json();
       } else {
         const text = await resp.text();
-        console.error("Respuesta no JSON /api/login:", text);
+        console.error("Respuesta no JSON /api/signup:", text);
         throw new Error("Error de servidor: respuesta no JSON (revisa la URL).");
       }
 
       if (!resp.ok) {
-        throw new Error(data?.message || data?.msg || "Credenciales inválidas");
+        throw new Error(data?.message || data?.msg || "No se pudo crear el usuario");
       }
 
-      const token = data.token;
-      if (!token) {
-        throw new Error("El servidor no devolvió un token");
-      }
-
-      sessionStorage.setItem("token", token);
-      sessionStorage.setItem("userEmail", form.email);
-
-      navigate("/private");
+      navigate("/login");
     } catch (err) {
       console.error(err);
       setError(err.message);
@@ -62,8 +54,8 @@ export function Login() {
 
   return (
     <section className="auth-page">
-      <h2>Iniciar sesión</h2>
-      <p>Accede a tu Panel Seguro con las credenciales que registraste.</p>
+      <h2>Crear cuenta</h2>
+      <p>Usa un correo y una contraseña segura. Luego podrás acceder a tu zona privada.</p>
 
       <form className="auth-form" onSubmit={handleSubmit}>
         <label>
@@ -79,7 +71,6 @@ export function Login() {
 
         <label>
           Contraseña
-          {/* si quieres VER la contraseña mientras debuggeas, cambia a type="text" */}
           <input
             type="password"
             name="password"
@@ -92,11 +83,11 @@ export function Login() {
         {error && <p className="error-msg">{error}</p>}
 
         <button type="submit" className="btn" disabled={loading}>
-          {loading ? "Entrando..." : "Entrar"}
+          {loading ? "Creando..." : "Registrarme"}
         </button>
       </form>
     </section>
   );
 }
 
-export default Login;
+export default Signup;
